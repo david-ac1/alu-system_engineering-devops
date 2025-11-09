@@ -5,18 +5,14 @@
 #   - Nginx should be listening on port 80
 #   - Return page containing "Holberton School" when queried
 
-apt-get update
+apt-get update -y
 apt-get install -y nginx
 
-mkdir /etc/nginx/html
-touch /etc/nginx/html/index.html
-echo "Holberton School" > /etc/nginx/html/index.html
-printf %s "server {
-     listen      80 default_server;
-     listen      [::]:80 default_server;
-     root        /etc/nginx/html;
-     index       index.html index.htm;
-}
-" > /etc/nginx/sites-available/default
+# Create index.html with required text in the correct nginx web root
+echo "Holberton School" > /var/www/html/index.html
 
+# Remove default nginx index file if it exists
+rm -f /var/www/html/index.nginx-debian.html
+
+# Restart nginx without using systemctl
 service nginx restart
