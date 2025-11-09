@@ -1,9 +1,21 @@
 #!/usr/bin/env bash
-# Install and configure Nginx to return a specific content
+# a Bash script that configures a new Ubuntu machine to respect
+# above requirements (this script will be run on the server itself)
+# bash script to install nginx web server
+#   - Nginx should be listening on port 80
+#   - Return page containing "Holberton School" when queried
 
 apt-get update -y
 apt-get install -y nginx
 
-echo "Holberton School for the win!" > /var/www/html/index.html
+# Ensure nginx is running
+service nginx start
 
+# Create index.html with required text in the correct nginx web root
+echo "Holberton School" > /var/www/html/index.html
+
+# Remove default nginx index file if it exists
+rm -f /var/www/html/index.nginx-debian.html
+
+# Restart nginx without using systemctl
 service nginx restart
