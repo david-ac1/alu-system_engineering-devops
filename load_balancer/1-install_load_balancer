@@ -4,37 +4,33 @@
 #+    Distributes requests using a round-robin algorithm.
 
 apt-get update
-apt-get install -y haproxy
+apt-get install -y nginx
 
-echo "ENABLED=1" >> /etc/default/haproxy
-mv /etc/haproxy/haproxy.cfg{,.original}
-touch /etc/haproxy/haproxy.cfg
+mkdir -p /var/www/html
+echo "Holberton School for the win!" > /var/www/html/index.html
+echo "Ceci n'est pas une page" > /var/www/html/404.html
 
-printf %s "global
-    log /dev/log local0
-    maxconn 2000
-    user haproxy
-    group haproxy
+HOSTNAME=$(hostname)
 
-defaults
-    log     global
-    mode    http
-    option  httplog
-    option  dontlognull
-    retries 3
-    option redispatch
-    timeout connect  5000
-    timeout client  10000
-    timeout server  10000
+printf %s "server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    root /var/www/html;
+    index index.html index.htm;
+    server_name _;
+    add_header X-Served-By $HOSTNAME always;
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+    location /redirect_me {
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+    }
+    error_page 404 /404.html;
+    location = /404.html {
+        root /var/www/html;
+        internal;
+    }
+}
+" > /etc/nginx/sites-available/default
 
-listen hbnb
-    bind 0.0.0.0:80
-    mode http
-    stats enable
-    stats uri /haproxy?stats
-    balance roundrobin
-    option httpclose
-    option forwardfor
-    server 6936-web-01 54.208.234.99:80 check
-    server 6936-web-02 44.203.55.51:80 check
-" >> /etc/haproxy/haproxy.cfg
+service nginx restart
